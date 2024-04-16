@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using System.Speech.Synthesis;
 using System.Net.Http;
 using System.Media;
+using System.ComponentModel.Design;
 
 namespace Prog6221_POE
 {
@@ -354,6 +355,28 @@ namespace Prog6221_POE
             foreach (var ingredient in Ingredients)
             {
                 ingredient.quantity /= scale;
+            }
+        }
+
+        public void ResetRecipe(Recipes recipes)
+        {
+            message = "Are you sure? (yes/no)";
+            Console.WriteLine(message);
+            Speak(message);
+            string answer = Console.ReadLine();
+            if (answer == "yes")
+            {
+                RecipeName = "";
+                NumOfIngredients = 0;
+                Ingredients.Clear();
+                Steps.Clear();
+                Scale = 0;
+                NumOfSteps = 0;
+                recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
+            }
+            else
+            {
+                Menu();
             }
         }
 

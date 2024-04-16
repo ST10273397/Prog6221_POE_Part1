@@ -19,6 +19,8 @@ namespace Prog6221_POE
             recipes.ViewRecipe();
             recipes.ResetScale(recipes, scale);
             recipes.ViewRecipe();
+            recipes.ResetRecipe(recipes);
+            recipes.ViewRecipe();
             Console.ReadKey();
         }
     }
