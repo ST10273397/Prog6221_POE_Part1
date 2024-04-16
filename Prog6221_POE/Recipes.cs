@@ -7,6 +7,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Speech.Synthesis;
+using System.Net.Http;
+using System.Media;
 
 namespace Prog6221_POE
 {
@@ -24,6 +27,13 @@ namespace Prog6221_POE
 
         public double Scale { get; set; }
 
+        SpeechSynthesizer talk = new SpeechSynthesizer();
+
+        public bool Talk {  get; set; }
+
+        public string message { get; set; }
+
+        public System.Media.SoundPlayer MusicMan = new SoundPlayer();
 
         public Recipes() { }
 
@@ -37,14 +47,68 @@ namespace Prog6221_POE
             Scale = scale;
         }
 
+        public void Settings()
+        {
+            Console.WriteLine("Would you like text-to-speech? (yes/no)");
+            talk.Speak("Would you like text-to-speech? (yes/no)");
+            string answer = Console.ReadLine();
+            if (answer.ToLower() == "yes") 
+            {
+                Talk = true;
+                message = "Text-to-speech is now enabled.";
+                Console.WriteLine(message);
+                talk.Speak(message);
+            }
+            else
+            {
+                Talk = false;
+            }
+            message = "Would you like dark or light mode? Please type in only 'dark' or 'light'.";
+            Console.WriteLine(message);
+            Speak(message);
+            answer = Console.ReadLine();
+            Console.WriteLine("-------------------------------------------------------------------------------");
+            if (answer == "light")
+            {
+                Console.BackgroundColor = ConsoleColor.White;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+            }
+            message = "Would you like music? (yes/no)";
+            Console.WriteLine(message);
+            Speak(message);
+            answer = Console.ReadLine();
+            if (answer.ToLower() == "yes")
+            {
+                this.MusicMan = new SoundPlayer(@"C:\Users\nicho\source\repos\Prog6221_POE\Prog6221_POE\Camille, Michael Giacchino - Le Festin (From ＂Ratatouille＂).wav");
+                this.MusicMan.PlayLooping();
+            }
+        }
+
+        public void Speak(string message)
+        {
+            if (Talk)
+            {
+                talk.Speak(message);
+            }
+        }
+
         public void InputIngredients(int numOfIngredients)
         {
             string name = null;
-            Console.WriteLine("Please Enter the First Ingredient Name");
+            Console.WriteLine("------------------------------------------------------------------------------");
+            message = "What is the first ingredient's name?";
+            Console.WriteLine(message);
+            Speak(message);
             name = StringCheck();
-            Console.WriteLine("Please Enter the Unit of Measurement (whole/ml/cups/teaspoons)");
+            message = "What unit of measurement(tsp/tbsp/cups) will the ingredient use?";
+            Console.WriteLine(message);
+            Speak(message);
             string unit = Console.ReadLine();
-            Console.WriteLine("How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Meaasurement)");
+            message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Measurement)";
+            Console.WriteLine(message);
+            Speak(message);
             double quantity = 0;
             while (quantity <= 0)
             {
@@ -55,7 +119,10 @@ namespace Prog6221_POE
                 catch (Exception ex)
                 {
                     Console.WriteLine($"{ex.Message}");
-                    Console.WriteLine("Please Type in a Number. No Letters, Words or Phrases.");
+                    Speak($"{ex.Message}");
+                    message = "Please Type in a Number. No Letters, Words or Phrases.";
+                    Console.WriteLine(message);
+                    Speak(message);
                     continue;
                 }
             }
@@ -63,12 +130,19 @@ namespace Prog6221_POE
             Ingredients.Add(newIngredient);
             for (int i = 0; i < numOfIngredients - 1; i++)
             {
-                Console.WriteLine("Enter the Next Ingredient");
+                Console.WriteLine("--------------------------------------------------------------------------");
+                message = "What is the next ingredients name?";
+                Console.WriteLine(message);
+                Speak(message);
                 newIngredient = new Ingredient();
                 newIngredient.name = StringCheck();
-                Console.WriteLine("Please Enter the Unit of Measurement (whole/ml/cups/teaspoons)");
+                message = "What unit of measurement(tsp / tblsp / cups) will the ingredient use?";
+                Console.WriteLine(message);
+                Speak(message);
                 newIngredient.unit = Console.ReadLine();
-                Console.WriteLine("How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Meaasurement)");
+                message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Meaasurement)";
+                Console.WriteLine(message);
+                Speak(message);
                 while (newIngredient.quantity <= 0)
                 {
                     try
@@ -77,8 +151,12 @@ namespace Prog6221_POE
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"{ex.Message}");
-                        Console.WriteLine("Please Type in a Number that is Greater than Zero. No Letters, Words or Phrases.");
+                        message = $"{ex.Message}";
+                        Console.WriteLine(message);
+                        Speak(message);
+                        message = "Please Type in a Number that is Greater than Zero. No Letters, Words or Phrases.";
+                        Console.WriteLine(message);
+                        Speak(message);
                         continue;
                     }
                 }
@@ -89,37 +167,52 @@ namespace Prog6221_POE
         public void InputStep()
         {
             NumOfSteps = 1;
-            Console.WriteLine("Please Enter Step " + NumOfSteps);
+            Console.WriteLine("------------------------------------------------------------------------------");
+            message = "What is Step " + NumOfSteps;
+            Console.WriteLine(message);
+            Speak(message);
             Step newStep = new Step();
             newStep.StepDescription = Console.ReadLine();
             while (String.IsNullOrWhiteSpace(newStep.StepDescription)) 
             {
-                Console.WriteLine("The Step Cannot Be Empty");
-                Console.WriteLine("Please Try Again");
+                message = "The Step Cannot Be Empty. Please Try Again.";
+                Console.WriteLine(message);
+                Speak(message);
                 newStep.StepDescription = Console.ReadLine();
             }
             Steps.Add(newStep);
-            while (newStep.StepDescription != "Finish")
+            while (newStep.StepDescription.ToUpper() != "XXX")
             {
                 NumOfSteps++;
-                Console.WriteLine("Please Enter the Step " + NumOfSteps + " or Finish to Finish");
+                message = "What is Step " + NumOfSteps;
+                Console.WriteLine(message);
+                Speak(message);
+                message = "If you are finish, you can type in finish to end.";
+                Console.WriteLine(message);
+                Speak(message);
                 newStep = new Step();
                 newStep.StepDescription = Console.ReadLine();
                 while (String.IsNullOrWhiteSpace(newStep.StepDescription))
                 {
-                    Console.WriteLine("The Step Cannot Be Empty");
-                    Console.WriteLine("Please Try Again");
+                    message = "The Step Cannot Be Empty. Please Try Again.";
+                    Console.WriteLine(message);
+                    Speak(message);
                     newStep.StepDescription = Console.ReadLine();
                 }
                 Steps.Add(newStep);
             }
+            Steps.RemoveAt(NumOfSteps - 1);
         }
 
         public void CreateRecipe()
         {
-            Console.WriteLine("Please Enter A Name For Your Recipe");
+            message = "What is the name of your recipe?";
+            Console.WriteLine(message);
+            Speak(message);
             RecipeName = StringCheck();
-            Console.WriteLine("Please Enter The Number of Ingredients For Your Recipe");
+            message = "How many different types of ingredients will you use? (For Example, if you have 3 Apples and 1 Banana then you have 2 ingredients.)";
+            Console.WriteLine(message);
+            Speak(message);
             while (NumOfIngredients == 0)
             {
                 try
@@ -128,13 +221,18 @@ namespace Prog6221_POE
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine("Please Type in a Number. No Letters, Words or Phrases.");
+                    message = ex.Message;
+                    Console.WriteLine(message);
+                    Speak(message);
+                    message = "Please Type in a Number. No Letters, Words or Phrases.";
+                    Console.WriteLine(message);
+                    Speak(message);
                     continue;
                 }
             }
             InputIngredients(NumOfIngredients);
             InputStep();
+            Console.WriteLine("------------------------------------------------------------------------------");
             Scale = 1;
             Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, NumOfSteps, Scale);
         }
@@ -146,14 +244,20 @@ namespace Prog6221_POE
             {
                 if (Regex.IsMatch(input, @"\d"))
                 {
-                    Console.WriteLine("Please Do Not Enter Any Numbers");
+                    message = "Please Do Not Enter Any Numbers";
+                    Console.WriteLine(message);
+                    Speak(message);
 
                 }
                 if (String.IsNullOrEmpty(input))
                 {
-                    Console.WriteLine("Please Do Not Leave Empty");
+                    message = "Please Do Not Leave Empty";
+                    Console.WriteLine(message);
+                    Speak(message);
                 }
-                Console.WriteLine("Please Try Again.");
+                message = "Please Try Again.";
+                Console.WriteLine(message);
+                Speak(message);
                 input = Console.ReadLine();
             }
             return input;
@@ -161,8 +265,10 @@ namespace Prog6221_POE
 
         public double GetScale()
         {
-            Console.WriteLine("Please Select How You Want To Scale The Recipe");
-            Console.WriteLine("1. Half or 2. Double or 3. Triple");
+            message = "How would you like to scale the recipe? Please select from below." +
+                "\nOption 1, Half. or Option 2, Double. or Option 3, Triple. ";
+            Console.WriteLine(message);
+            Speak(message);
             double scale = 1;
             string input;
             do
@@ -183,7 +289,9 @@ namespace Prog6221_POE
                         break;
 
                     default:
-                        Console.WriteLine("Please select Either Option 1 for Half, 2 for Double or 3 for Triple.");
+                        message = "Please select Either Option 1 for Half, 2 for Double or 3 for Triple.";
+                        Console.WriteLine(message);
+                        Speak(message);
                         continue;
                 }
 
@@ -203,23 +311,41 @@ namespace Prog6221_POE
 
         public void ViewRecipe()
         {
-            Console.WriteLine("\nRecipe: " +
-                "\n" + RecipeName + ": " +
-                 "\nScale:" + Scale +
-                "\n" + NumOfIngredients + " Ingredients" +
-                "\n\n" + "Ingredients: ");
+            Console.WriteLine("\n\nRecipe: " +
+               "\n***************************************************************" +
+               "\n" + RecipeName + ": " +
+               "\n---------------------------------------------------------------------" +
+                "\nScale: " + Scale +
+               "\n" + NumOfIngredients + " Ingredients" +
+               "\n\n" + "Ingredients: " +
+               "\n==============");
             foreach (var Ingredients in Ingredients)
             {
                 Console.WriteLine(Ingredients.ToString());
             }
-            Console.WriteLine(" \n Instructions: ");
+            Console.WriteLine("\nInstructions: " +
+                "\n==============");
             int i = 1;
             foreach (var Step in Steps)
             {
                 Console.WriteLine(i + ". " + Step.ToString());
                 i++;
             }
-            Console.Write("Enjoy!");
+            Console.Write("Finish!\nEnjoy!!!");
+            Speak("Recipe:" + RecipeName + "Scale: " + Scale + NumOfIngredients + "Ingredients. Ingredients:");
+            foreach (var Ingredients in Ingredients)
+            {
+                Speak(Ingredients.ToString());
+            }
+            Speak("\nInstructions: ");
+            i = 1;
+            foreach (var Step in Steps)
+            {
+                Speak("Step" + i + ". " + Step.ToString());
+                i++;
+            }
+            Speak("Finish!\nEnjoy!!!");
+           
         }
 
         public void ResetScale(Recipes recipes, double scale)

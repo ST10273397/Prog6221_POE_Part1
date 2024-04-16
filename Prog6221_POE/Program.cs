@@ -12,6 +12,7 @@ namespace Prog6221_POE
         {
             Recipes recipes = new Recipes();
             Ingredient ingredient = new Ingredient();
+            recipes.Settings();
             recipes.CreateRecipe();
             double scale = recipes.GetScale();
             recipes.ScaleRecipe(recipes, scale);
