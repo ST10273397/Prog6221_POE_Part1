@@ -11,16 +11,7 @@ namespace Prog6221_POE
         static void Main(string[] args)
         {
             Recipes recipes = new Recipes();
-            Ingredient ingredient = new Ingredient();
-            recipes.Settings();
-            recipes.CreateRecipe();
-            double scale = recipes.GetScale();
-            recipes.ScaleRecipe(recipes, scale);
-            recipes.ViewRecipe();
-            recipes.ResetScale(recipes, scale);
-            recipes.ViewRecipe();
-            recipes.ResetRecipe(recipes);
-            recipes.ViewRecipe();
+            recipes.Menu();
             Console.ReadKey();
         }
     }

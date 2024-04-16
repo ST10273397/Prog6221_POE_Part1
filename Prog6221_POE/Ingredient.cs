@@ -15,16 +15,28 @@ namespace Prog6221_POE
 
         public double scale { get; set; }
 
-        public string unit { get; set; }
+        public enum Unit
+        {
+            tsp,
+            tbsp,
+            cup,
+            cups,
+            other
+        }
+
+        public Unit unit { get; set; }
+
+        public string otherUnit { get; set; }
 
         public Ingredient() { }
 
-        public Ingredient(string nme, double qnty, double scle, string u)
+        public Ingredient(string nme, double qnty, double scle, Unit u, string oUnit)
         {
             name = nme;
             quantity = qnty;
             scale = scle;
             unit = u;
+            otherUnit = oUnit;
         }
 
         public double Scale(double scale)
@@ -35,7 +47,15 @@ namespace Prog6221_POE
 
         public override string ToString()
         {
-            string ing = name + ", " + quantity + " " + unit;
+            string ing = "";
+            if (unit == Unit.other)
+            {
+                ing = name + ", " + quantity + " " + otherUnit;
+            }
+            else
+            {
+                ing = name + ", " + quantity + " " + unit;
+            }
             return ing;
         }
 

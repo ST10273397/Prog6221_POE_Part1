@@ -11,6 +11,8 @@ using System.Speech.Synthesis;
 using System.Net.Http;
 using System.Media;
 using System.ComponentModel.Design;
+using System.CodeDom;
+using static Prog6221_POE.Ingredient;
 
 namespace Prog6221_POE
 {
@@ -30,7 +32,7 @@ namespace Prog6221_POE
 
         SpeechSynthesizer talk = new SpeechSynthesizer();
 
-        public bool Talk {  get; set; }
+        public bool Talk { get; set; }
 
         public string message { get; set; }
 
@@ -48,12 +50,22 @@ namespace Prog6221_POE
             Scale = scale;
         }
 
+        public void Start()
+        {
+            Settings();
+            CreateRecipe();
+            ViewRecipe();
+
+
+            
+        }
+
         public void Settings()
         {
             Console.WriteLine("Would you like text-to-speech? (yes/no)");
             talk.Speak("Would you like text-to-speech? (yes/no)");
             string answer = Console.ReadLine();
-            if (answer.ToLower() == "yes") 
+            if (answer.ToLower() == "yes")
             {
                 Talk = true;
                 message = "Text-to-speech is now enabled.";
@@ -103,10 +115,6 @@ namespace Prog6221_POE
             Console.WriteLine(message);
             Speak(message);
             name = StringCheck();
-            message = "What unit of measurement(tsp/tbsp/cups) will the ingredient use?";
-            Console.WriteLine(message);
-            Speak(message);
-            string unit = Console.ReadLine();
             message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Measurement)";
             Console.WriteLine(message);
             Speak(message);
@@ -127,7 +135,53 @@ namespace Prog6221_POE
                     continue;
                 }
             }
-            Ingredient newIngredient = new Ingredient { name = name, quantity = quantity, unit = unit, scale = 1 };
+            message = "What unit of measurement will the ingredient use?\nOption 1 for tsp, Option 2 for tbsp, Option 3 for cups or Option 4 for other.";
+            Console.WriteLine(message);
+            Speak(message);
+            string input;
+            Ingredient.Unit unit = Ingredient.Unit.cup;
+            string other = "";
+            do
+            {
+                input = Console.ReadLine();
+                switch (input)
+                {
+                    case "1":
+                        unit = Ingredient.Unit.tsp;
+                        break;
+
+                    case "2":
+                        unit = Ingredient.Unit.tbsp;
+                        break;
+
+                    case "3":
+                        if (quantity > 1)
+                        {
+                            unit = Ingredient.Unit.cups;
+                        }
+                        else
+                        {
+                            unit = Ingredient.Unit.cup;
+                        }
+                        break;
+
+                    case "4":
+                        message = "What unit of measurement would you like to use?";
+                        Console.WriteLine(message);
+                        Speak(message);
+                        unit = Ingredient.Unit.other;
+                        other = Console.ReadLine();
+                        break;
+
+                    default:
+                        message = "Option 1 for tsp, Option 2 for tbsp, Option 3 for cups or Option 4 for other.";
+                        Console.WriteLine(message);
+                        Speak(message);
+                        continue;
+                }
+
+            } while (input != "1" && input != "2" && input != "3" && input != null);
+            Ingredient newIngredient = new Ingredient { name = name, quantity = quantity, unit = unit, otherUnit = other, scale = 1 };
             Ingredients.Add(newIngredient);
             for (int i = 0; i < numOfIngredients - 1; i++)
             {
@@ -137,10 +191,6 @@ namespace Prog6221_POE
                 Speak(message);
                 newIngredient = new Ingredient();
                 newIngredient.name = StringCheck();
-                message = "What unit of measurement(tsp / tblsp / cups) will the ingredient use?";
-                Console.WriteLine(message);
-                Speak(message);
-                newIngredient.unit = Console.ReadLine();
                 message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Meaasurement)";
                 Console.WriteLine(message);
                 Speak(message);
@@ -161,6 +211,49 @@ namespace Prog6221_POE
                         continue;
                     }
                 }
+                message = "What unit of measurement will the ingredient use?\nOption 1 for tsp, Option 2 for tbsp, Option 3 for cups or Option 4 for other.";
+                Console.WriteLine(message);
+                Speak(message);
+                do
+                {
+                    input = Console.ReadLine();
+                    switch (input)
+                    {
+                        case "1":
+                            newIngredient.unit = Ingredient.Unit.tsp;
+                            break;
+
+                        case "2":
+                            newIngredient.unit = Ingredient.Unit.tbsp;
+                            break;
+
+                        case "3":
+                            if (newIngredient.quantity > 1)
+                            {
+                                newIngredient.unit = Ingredient.Unit.cups;
+                            }
+                            else
+                            {
+                                newIngredient.unit = Ingredient.Unit.cup;
+                            }
+                            break;
+
+                        case "4":
+                            message = "What unit of measurement would you like to use?";
+                            Console.WriteLine(message);
+                            Speak(message);
+                            newIngredient.unit = Ingredient.Unit.other;
+                            newIngredient.otherUnit = Console.ReadLine();
+                            break;
+
+                        default:
+                            message = "Option 1 for tsp, Option 2 for tbsp, Option 3 for cups or Option 4 for other.";
+                            Console.WriteLine(message);
+                            Speak(message);
+                            continue;
+                    }
+
+                } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
                 Ingredients.Add(newIngredient);
             }
         }
@@ -174,7 +267,7 @@ namespace Prog6221_POE
             Speak(message);
             Step newStep = new Step();
             newStep.StepDescription = Console.ReadLine();
-            while (String.IsNullOrWhiteSpace(newStep.StepDescription)) 
+            while (String.IsNullOrWhiteSpace(newStep.StepDescription))
             {
                 message = "The Step Cannot Be Empty. Please Try Again.";
                 Console.WriteLine(message);
@@ -301,13 +394,45 @@ namespace Prog6221_POE
             return scale;
         }
 
-        public void ScaleRecipe(Recipes recipes, double scale)
+        public void ScaleRecipe(double scale)
         {
+            const double TSP_PER_TBSP = 3.0;
+            const double TBSP_PER_CUP = 16.0;
+            const double TSP_PER_CUP = TSP_PER_TBSP * TBSP_PER_CUP;
+
+
             Scale *= scale;
             foreach (var ingredient in Ingredients)
             {
                 ingredient.quantity *= scale;
+                if (ingredient.quantity * scale == TSP_PER_TBSP)
+                {
+                    ingredient.unit = Ingredient.Unit.tbsp;
+                }
+                if (ingredient.quantity * scale == TBSP_PER_CUP)
+                {
+                    if (ingredient.quantity == TBSP_PER_CUP)
+                    {
+                        ingredient.unit = Ingredient.Unit.cup;
+                    }
+                    else
+                    {
+                        ingredient.unit = Ingredient.Unit.cups;
+                    }
+                }
+                if (ingredient.quantity * scale == TSP_PER_CUP)
+                {
+                    if (ingredient.quantity == TSP_PER_CUP)
+                    {
+                        ingredient.unit = Ingredient.Unit.cup;
+                    }
+                    else
+                    {
+                        ingredient.unit = Ingredient.Unit.cups;
+                    }
+                }
             }
+            ViewRecipe();
         }
 
         public void ViewRecipe()
@@ -346,19 +471,62 @@ namespace Prog6221_POE
                 i++;
             }
             Speak("Finish!\nEnjoy!!!");
-           
+            message = "Would you like to scale your recipe? (yes/no)";
+            Console.WriteLine(message);
+            Speak(message);
+            string answer = Console.ReadLine();
+            if (answer.ToLower() == "yes")
+            {
+                double scale = GetScale();
+                ScaleRecipe(scale);
+            }
+            message = "Would you like to reset the scales? (yes/no)";
+            Console.WriteLine(message);
+            Speak(message);
+            answer = Console.ReadLine();
+            if (answer == "yes")
+            {
+                ResetScale();
+            }
+            message = "Would you like to reset the recipe? (yes/no)";
+            Console.WriteLine(message);
+            Speak(message);
+            answer = Console.ReadLine();
+            if (answer == "yes")
+            {
+                ResetRecipe();
+            }
+
+
         }
 
-        public void ResetScale(Recipes recipes, double scale)
+        public void ResetScale()
         {
+            const double TSP_PER_TBSP = 3.0;
+            const double TBSP_PER_CUP = 16.0;
+            const double TSP_PER_CUP = TSP_PER_TBSP * TBSP_PER_CUP;
+
             Scale = 1;
             foreach (var ingredient in Ingredients)
             {
-                ingredient.quantity /= scale;
+                ingredient.quantity /= ingredient.scale;
+                if (ingredient.quantity / ingredient.scale == TSP_PER_TBSP)
+                {
+                    ingredient.unit = Ingredient.Unit.tsp;
+                }
+                if (ingredient.quantity / ingredient.scale == TBSP_PER_CUP)
+                {
+                    ingredient.unit = Ingredient.Unit.tbsp;
+                }
+                if (ingredient.quantity *  ingredient.scale == TSP_PER_CUP)
+                {
+                    ingredient.unit = Ingredient.Unit.tsp;
+                }
             }
+
         }
 
-        public void ResetRecipe(Recipes recipes)
+        public void ResetRecipe()
         {
             message = "Are you sure? (yes/no)";
             Console.WriteLine(message);
@@ -372,11 +540,7 @@ namespace Prog6221_POE
                 Steps.Clear();
                 Scale = 0;
                 NumOfSteps = 0;
-                recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
-            }
-            else
-            {
-                Menu();
+                Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
             }
         }
 
