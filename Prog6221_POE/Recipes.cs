@@ -7,6 +7,7 @@ using System.Threading;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Runtime.Remoting.Lifetime;
+using System.Threading.Tasks;
 
 namespace Prog6221_POE
 {
@@ -105,42 +106,51 @@ namespace Prog6221_POE
             Console.WriteLine(message);
             Speak(message);
             answer = StringCheck();
-            Console.WriteLine("-------------------------------------------------------------------------------");
-            while (answer.ToLower() == "light")
+            while (answer.ToLower() != "light" && answer.ToLower() != "dark")
             {
-                if (answer.ToLower() != "light" || answer.ToLower() != "dark")
-                {
-                    message = "Please type in only 'dark' or 'light'.";
-                    Console.WriteLine(message);
-                    Speak(message);
-                    continue;
-                }
+                message = "Please only type in Light or Dark";
+                Console.WriteLine(message);
+                talk.Speak(message);
+                answer = StringCheck();
+            }
+            if (answer.ToLower() == "light")
+            {
+                
                 Console.BackgroundColor = ConsoleColor.White;
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                break;
             }
 
             //Prompting user for usic prefernce
             message = "Would you like music? (yes/no)";
             Console.WriteLine(message);
             Speak(message);
-            answer = Console.ReadLine();
-            while (answer.ToLower() != "yes" || answer.ToLower() != "no")
+            answer = StringCheck();
+            while (answer.ToLower() != "yes" && answer.ToLower() != "no")
             {
                 message = "Please type in only 'yes' or 'no'.";
                 Console.WriteLine(message);
                 Speak(message);
-                continue;
+                answer = StringCheck();
             }
             if (answer.ToLower() == "yes")
             {
+                PlayMusicAsync();
+            }
+            Console.WriteLine("-------------------------------------------------------------------------------");
+        }
 
-                //Array of songs
-                string[] songs = { "Camille, Michael Giacchino - Le Festin (From ＂Ratatouille＂).wav", "Apotos (Day) - Sonic Unleashed [OST].wav", "Happy Day in Paris.wav" };
+        public async Task PlayMusicAsync()
+        {
+            // Array of songs
+            string[] songs = { "Camille, Michael Giacchino - Le Festin (From ＂Ratatouille＂).wav", "Apotos (Day) - Sonic Unleashed [OST].wav", "Happy Day in Paris.wav" };
+
+            // Use Task.Run to execute the music playing task asynchronously
+            await Task.Run(() =>
+            {
                 while (true)
                 {
-                    //Playing songs indefinitely
+                    // Playing songs indefinitely
                     foreach (string song in songs)
                     {
                         using (var MusicMan = new SoundPlayer(song))
@@ -148,15 +158,12 @@ namespace Prog6221_POE
                             MusicMan.Load();
                             MusicMan.PlaySync();
                         }
-                        Thread.Sleep(100);
                     }
-
                 }
-
-            }
+            });
         }
 
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\\
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\\
 
         /// <summary>
         /// Method to speak a message if text-to-speech is enabled
@@ -216,7 +223,7 @@ namespace Prog6221_POE
             Console.WriteLine(message);
             Speak(message);
             string input;
-            Ingredient.Unit unit = Ingredient.Unit.cup;
+            Ingredient.Unit unit = Ingredient.Unit.other;
             string other = "";
             do
             {
@@ -232,14 +239,8 @@ namespace Prog6221_POE
                         break;
 
                     case "3":
-                        if (quantity > 1)
-                        {
-                            unit = Ingredient.Unit.cups;
-                        }
-                        else
-                        {
-                            unit = Ingredient.Unit.cup;
-                        }
+                                unit = Ingredient.Unit.cups;
+                        
                         break;
 
                     case "4":
@@ -278,7 +279,7 @@ namespace Prog6221_POE
                 newIngredient.name = StringCheck();
 
                 //Prompting user for the quantity of the next ingredient
-                message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Meaasurement)";
+                message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Measurement)";
                 Console.WriteLine(message);
                 Speak(message);
                 while (newIngredient.quantity <= 0)
@@ -317,15 +318,9 @@ namespace Prog6221_POE
                             break;
 
                         case "3":
-                            if (newIngredient.quantity > 1)
-                            {
+                            
                                 newIngredient.unit = Ingredient.Unit.cups;
-                            }
-                            else
-                            {
-                                newIngredient.unit = Ingredient.Unit.cup;
-                            }
-                            break;
+                                                        break;
 
                         case "4":
                             message = "What unit of measurement would you like to use?";
@@ -579,12 +574,12 @@ namespace Prog6221_POE
                 else if (ingredient.unit == Ingredient.Unit.tbsp && ingredient.quantity >= TBSP_PER_CUP)
                 {
                     ingredient.quantity /= TBSP_PER_CUP; //Converting tsp to cups
-                    ingredient.unit = Ingredient.Unit.cup; //Updating unit
+                    ingredient.unit = Ingredient.Unit.cups; //Updating unit
                 }
                 else if (ingredient.unit == Ingredient.Unit.tsp && ingredient.quantity >= TSP_PER_CUP)
                 {
                     ingredient.quantity /= TSP_PER_CUP; //Converting tsp to cups
-                    ingredient.unit = Ingredient.Unit.cup; //Updating unit
+                    ingredient.unit = Ingredient.Unit.cups; //Updating unit
                 }
             }
             //Displaying the updated recipe after scaling
@@ -620,7 +615,7 @@ namespace Prog6221_POE
             Console.Write("Finish!\nEnjoy!!!");
 
             //Speaking the recipe details
-            Speak("Recipe:" + RecipeName + "Scale: " + Scale + NumOfIngredients + "Ingredients. Ingredients:");
+            Speak("Recipe:" + RecipeName + "Scale: " + Scale + ". " + NumOfIngredients + "Ingredients. Ingredients:");
             foreach (var Ingredients in IngredientArray)
             {
                 Speak(Ingredients.ToString());
@@ -701,6 +696,7 @@ namespace Prog6221_POE
             if (answer == "yes")
             {
                 CreateRecipe();
+                ViewRecipe();
             }
             else
             {
@@ -736,12 +732,12 @@ namespace Prog6221_POE
                     ingredient.quantity *= TSP_PER_TBSP;
                     ingredient.unit = Ingredient.Unit.tsp;
                 }
-                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity <= TBSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.cups && ingredient.quantity <= TBSP_PER_CUP)
                 {
                     ingredient.quantity *= TBSP_PER_CUP;
                     ingredient.unit = Ingredient.Unit.tbsp;
                 }
-                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity <= TSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.cups && ingredient.quantity <= TSP_PER_CUP)
                 {
                     ingredient.quantity *= TSP_PER_CUP;
                     ingredient.unit = Ingredient.Unit.tsp;
@@ -779,17 +775,15 @@ namespace Prog6221_POE
             {
                 //Resetting recipe properties
                 RecipeName = "";
+                Array.Clear(IngredientArray, 0, NumOfIngredients);
                 Ingredients.Clear();
-                IngredientArray = Ingredients.ToArray();
+                IngredientArray = Ingredients.ToArray(); //Resetting the Array
                 NumOfIngredients = 0;
+                Array.Clear(StepArray, 0, NumOfSteps - 1);
                 Steps.Clear();
-                StepArray = Steps.ToArray();
+                StepArray = Steps.ToArray(); //Resetting the Array
                 Scale = 0;
                 NumOfSteps = 0;
-
-                //Resetting arrays
-                Array.Clear(StepArray, 0, NumOfSteps - 1);
-                Array.Clear(IngredientArray, 0, NumOfIngredients);
 
                 //Creating a new instance of Recipes class
                 Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);

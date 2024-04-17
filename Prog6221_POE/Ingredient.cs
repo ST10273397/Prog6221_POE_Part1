@@ -20,7 +20,6 @@ namespace Prog6221_POE
         {
             tsp,
             tbsp,
-            cup,
             cups,
             other
         }
