@@ -9,6 +9,7 @@ namespace Prog6221_POE
 {
     internal class Ingredient
     {
+        //Properties to store ingredient name, quantity, scale, unit, and other unit.
         public string name {  get; set; }
 
         public double quantity { get; set; }
@@ -28,8 +29,18 @@ namespace Prog6221_POE
 
         public string otherUnit { get; set; }
 
+        //Default Constructor
         public Ingredient() { }
 
+
+        /// <summary>
+        /// Constructor with parameters to initialize ingredient properties
+        /// </summary>
+        /// <param name="nme"></param>
+        /// <param name="qnty"></param>
+        /// <param name="scle"></param>
+        /// <param name="u"></param>
+        /// <param name="oUnit"></param>
         public Ingredient(string nme, double qnty, double scle, Unit u, string oUnit)
         {
             name = nme;
@@ -39,14 +50,28 @@ namespace Prog6221_POE
             otherUnit = oUnit;
         }
 
+//-----------------------------------------------------------------------------------------\\
+        
+        /// <summary>
+        /// Method to scale the quantity of the ingredient
+        /// </summary>
+        /// <param name="scale"></param>
+        /// <returns></returns>
         public double Scale(double scale)
         {
             this.quantity *= scale;
             return scale;
         }
 
+//------------------------------------------------------------------------------------------\\
+
+        /// <summary>
+        /// Override ToString() method to return a string representation of the ingredient
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
+            //Building the string representation based on unit type
             string ing = "";
             if (unit == Unit.other)
             {
@@ -61,3 +86,4 @@ namespace Prog6221_POE
 
     }
 }
+//-----------------------------------------------------------------------494949494949___END-OF-FILE___49494494949949------------------------------------------------\\
