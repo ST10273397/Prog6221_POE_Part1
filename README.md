@@ -12,6 +12,9 @@ How to run the Application:
 Thank you for readinh
 
 References:
-blackbox.ai
-chat.openai.com
+blackbox.ai, 
+chat.openai.com, 
 Troelsen, A. and Japikse, P. 2021. Pro C# 9 with .NET 5: Foundational Principles and Practices in Programming. 10th ed. Apress.
+
+GitHub Repository Link:
+https://github.com/ST10273397/Prog6221_POE_Part1/
