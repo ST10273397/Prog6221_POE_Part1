@@ -11,8 +11,7 @@ namespace Prog6221_POE
         static void Main(string[] args)
         {
             Recipes recipes = new Recipes();
-            recipes.Menu();
-            Console.ReadKey();
+            recipes.Start();
         }
     }
 }

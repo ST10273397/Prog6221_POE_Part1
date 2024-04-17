@@ -57,7 +57,7 @@ namespace Prog6221_POE
             ViewRecipe();
 
 
-            
+
         }
 
         public void Settings()
@@ -180,7 +180,7 @@ namespace Prog6221_POE
                         continue;
                 }
 
-            } while (input != "1" && input != "2" && input != "3" && input != null);
+            } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
             Ingredient newIngredient = new Ingredient { name = name, quantity = quantity, unit = unit, otherUnit = other, scale = 1 };
             Ingredients.Add(newIngredient);
             for (int i = 0; i < numOfIngredients - 1; i++)
@@ -400,36 +400,24 @@ namespace Prog6221_POE
             const double TBSP_PER_CUP = 16.0;
             const double TSP_PER_CUP = TSP_PER_TBSP * TBSP_PER_CUP;
 
-
             Scale *= scale;
             foreach (var ingredient in Ingredients)
             {
                 ingredient.quantity *= scale;
-                if (ingredient.quantity * scale == TSP_PER_TBSP)
+                if (ingredient.unit == Ingredient.Unit.tsp && ingredient.quantity >= TSP_PER_TBSP)
                 {
+                    ingredient.quantity /= TSP_PER_TBSP;
                     ingredient.unit = Ingredient.Unit.tbsp;
                 }
-                if (ingredient.quantity * scale == TBSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.tbsp && ingredient.quantity >= TBSP_PER_CUP)
                 {
-                    if (ingredient.quantity == TBSP_PER_CUP)
-                    {
-                        ingredient.unit = Ingredient.Unit.cup;
-                    }
-                    else
-                    {
-                        ingredient.unit = Ingredient.Unit.cups;
-                    }
+                    ingredient.quantity /= TBSP_PER_CUP;
+                    ingredient.unit = Ingredient.Unit.cup;
                 }
-                if (ingredient.quantity * scale == TSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.tsp && ingredient.quantity >= TSP_PER_CUP)
                 {
-                    if (ingredient.quantity == TSP_PER_CUP)
-                    {
-                        ingredient.unit = Ingredient.Unit.cup;
-                    }
-                    else
-                    {
-                        ingredient.unit = Ingredient.Unit.cups;
-                    }
+                    ingredient.quantity /= TSP_PER_CUP;
+                    ingredient.unit = Ingredient.Unit.cup;
                 }
             }
             ViewRecipe();
@@ -471,7 +459,7 @@ namespace Prog6221_POE
                 i++;
             }
             Speak("Finish!\nEnjoy!!!");
-            message = "Would you like to scale your recipe? (yes/no)";
+            message = "\nWould you like to scale your recipe? (yes/no)";
             Console.WriteLine(message);
             Speak(message);
             string answer = Console.ReadLine();
@@ -484,7 +472,7 @@ namespace Prog6221_POE
             Console.WriteLine(message);
             Speak(message);
             answer = Console.ReadLine();
-            if (answer == "yes")
+            if (answer.ToLower() == "yes")
             {
                 ResetScale();
             }
@@ -492,11 +480,14 @@ namespace Prog6221_POE
             Console.WriteLine(message);
             Speak(message);
             answer = Console.ReadLine();
-            if (answer == "yes")
+            if (answer.ToLower() == "yes")
             {
                 ResetRecipe();
             }
-
+            message = "Thank you for creating your recipe. To close the app press enter.";
+            Console.WriteLine(message);
+            Speak(message);
+            Console.ReadKey();
 
         }
 
@@ -506,23 +497,28 @@ namespace Prog6221_POE
             const double TBSP_PER_CUP = 16.0;
             const double TSP_PER_CUP = TSP_PER_TBSP * TBSP_PER_CUP;
 
-            Scale = 1;
+            double inverseScale = 1 / Scale;
             foreach (var ingredient in Ingredients)
             {
-                ingredient.quantity /= ingredient.scale;
-                if (ingredient.quantity / ingredient.scale == TSP_PER_TBSP)
+                ingredient.quantity *= inverseScale;
+                if (ingredient.unit == Ingredient.Unit.tbsp && ingredient.quantity < TSP_PER_TBSP)
                 {
+                    ingredient.quantity *= TSP_PER_TBSP;
                     ingredient.unit = Ingredient.Unit.tsp;
                 }
-                if (ingredient.quantity / ingredient.scale == TBSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity < TBSP_PER_CUP)
                 {
+                    ingredient.quantity *= TBSP_PER_CUP;
                     ingredient.unit = Ingredient.Unit.tbsp;
                 }
-                if (ingredient.quantity *  ingredient.scale == TSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity < TSP_PER_CUP)
                 {
+                    ingredient.quantity *= TSP_PER_CUP;
                     ingredient.unit = Ingredient.Unit.tsp;
                 }
             }
+            Scale = 1;
+            ViewRecipe();
 
         }
 
@@ -542,6 +538,7 @@ namespace Prog6221_POE
                 NumOfSteps = 0;
                 Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
             }
+            ViewRecipe();
         }
 
     }
