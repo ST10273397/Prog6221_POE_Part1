@@ -24,7 +24,11 @@ namespace Prog6221_POE
 
         public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
 
+        public Ingredient[] IngredientArray { get; set; }
+
         public List<Step> Steps { get; set; } = new List<Step>();
+
+        Step[] StepArray { get; set; }
 
         public int NumOfSteps { get; set; }
 
@@ -256,6 +260,7 @@ namespace Prog6221_POE
                 } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
                 Ingredients.Add(newIngredient);
             }
+            IngredientArray = Ingredients.ToArray();
         }
 
         public void InputStep()
@@ -296,6 +301,7 @@ namespace Prog6221_POE
                 Steps.Add(newStep);
             }
             Steps.RemoveAt(NumOfSteps - 1);
+            StepArray = Steps.ToArray();
         }
 
         public void CreateRecipe()
@@ -433,27 +439,27 @@ namespace Prog6221_POE
                "\n" + NumOfIngredients + " Ingredients" +
                "\n\n" + "Ingredients: " +
                "\n==============");
-            foreach (var Ingredients in Ingredients)
+            foreach (var Ingredients in IngredientArray)
             {
                 Console.WriteLine(Ingredients.ToString());
             }
             Console.WriteLine("\nInstructions: " +
                 "\n==============");
             int i = 1;
-            foreach (var Step in Steps)
+            foreach (var Step in StepArray)
             {
                 Console.WriteLine(i + ". " + Step.ToString());
                 i++;
             }
             Console.Write("Finish!\nEnjoy!!!");
             Speak("Recipe:" + RecipeName + "Scale: " + Scale + NumOfIngredients + "Ingredients. Ingredients:");
-            foreach (var Ingredients in Ingredients)
+            foreach (var Ingredients in IngredientArray)
             {
                 Speak(Ingredients.ToString());
             }
             Speak("\nInstructions: ");
             i = 1;
-            foreach (var Step in Steps)
+            foreach (var Step in StepArray)
             {
                 Speak("Step" + i + ". " + Step.ToString());
                 i++;
@@ -484,10 +490,21 @@ namespace Prog6221_POE
             {
                 ResetRecipe();
             }
-            message = "Thank you for creating your recipe. To close the app press enter.";
+            message = "Would you like to create a new recipe?";
             Console.WriteLine(message);
             Speak(message);
-            Console.ReadKey();
+            answer = Console.ReadLine();
+            if (answer == "yes")
+            {
+                CreateRecipe();
+            }
+            else
+            {
+                message = "Thank you for using the app! Press Enter to Exit.";
+                Console.WriteLine(message);
+                Speak(message);
+                Console.ReadKey();
+            }
 
         }
 
@@ -501,17 +518,17 @@ namespace Prog6221_POE
             foreach (var ingredient in Ingredients)
             {
                 ingredient.quantity *= inverseScale;
-                if (ingredient.unit == Ingredient.Unit.tbsp && ingredient.quantity < TSP_PER_TBSP)
+                if (ingredient.unit == Ingredient.Unit.tbsp && ingredient.quantity <= TSP_PER_TBSP)
                 {
                     ingredient.quantity *= TSP_PER_TBSP;
                     ingredient.unit = Ingredient.Unit.tsp;
                 }
-                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity < TBSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity <= TBSP_PER_CUP)
                 {
                     ingredient.quantity *= TBSP_PER_CUP;
                     ingredient.unit = Ingredient.Unit.tbsp;
                 }
-                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity < TSP_PER_CUP)
+                else if (ingredient.unit == Ingredient.Unit.cup && ingredient.quantity <= TSP_PER_CUP)
                 {
                     ingredient.quantity *= TSP_PER_CUP;
                     ingredient.unit = Ingredient.Unit.tsp;
@@ -531,15 +548,18 @@ namespace Prog6221_POE
             if (answer == "yes")
             {
                 RecipeName = "";
-                NumOfIngredients = 0;
+                Array.Clear(IngredientArray, 0, NumOfIngredients);
                 Ingredients.Clear();
+                IngredientArray = Ingredients.ToArray();
+                NumOfIngredients = 0;
+                Array.Clear(StepArray, 0, NumOfSteps - 1);
                 Steps.Clear();
+                StepArray = Steps.ToArray();
                 Scale = 0;
                 NumOfSteps = 0;
                 Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
             }
             ViewRecipe();
         }
-
     }
 }
