@@ -82,11 +82,11 @@ namespace Prog6221_POE
             string ing = "";
             if (unit == Unit.other)
             {
-                ing = name + ", " + quantity + " " + otherUnit;
+                ing = name + ", " + quantity + " " + otherUnit + "\nCalories: " + calories + "\nFood Group: " + foodGroup;
             }
             else
             {
-                ing = name + ", " + quantity + " " + unit;
+                ing = name + ", " + quantity + " " + unit + "\nCalories: " + calories + "\nFood Group: " + foodGroup;
             }
             return ing;
         }

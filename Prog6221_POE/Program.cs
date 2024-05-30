@@ -18,7 +18,7 @@ namespace Prog6221_POE
             Recipes recipes = new Recipes();
 
             //Start the recipe creation process
-            recipes.Start();
+            recipes.Settings();
         }
     }
 }

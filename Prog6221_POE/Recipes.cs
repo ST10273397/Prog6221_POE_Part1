@@ -9,6 +9,11 @@ using System.Globalization;
 using System.Runtime.Remoting.Lifetime;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Diagnostics.CodeAnalysis;
+using System.Security.Policy;
+using System.Linq;
+using System.Collections;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Prog6221_POE
 {
@@ -19,7 +24,7 @@ namespace Prog6221_POE
 
         public int NumOfIngredients { get; set; }
 
-        public List<Recipes> RecipeList { get; set; } = new List<Recipes>();
+        public Dictionary<string, Recipes> RecipeList { get; set; } = new Dictionary<string, Recipes>();
 
         public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>(); // List to store ingredients
 
@@ -29,9 +34,11 @@ namespace Prog6221_POE
 
         public double Scale { get; set; }
 
-        public double TotalCalories { get; set; }
+        public static double TotalCalories { get; set; }
 
-        delegate void CalorieChecker();
+        delegate string CalorieChecker(double calories);
+
+        CalorieChecker Calories = new CalorieChecker(NotifyCalories);
 
         //SpeechSynthesizer for text-to-speech functionality
         SpeechSynthesizer talk = new SpeechSynthesizer();
@@ -42,10 +49,10 @@ namespace Prog6221_POE
         //Message string for communication with the user
         public string message { get; set; }
 
-        public string dark { get; set; }
-
         //SoundPlayer for playing music
-        public System.Media.SoundPlayer MusicMan = new SoundPlayer();
+        public SoundPlayer MusicMan = new SoundPlayer();
+
+        public static string dark;
 
         //Default constructor
         public Recipes() { }
@@ -71,13 +78,47 @@ namespace Prog6221_POE
             TotalCalories = tcal;
         }
 
-        //------------------------------------------------------------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------------------------------------------------------------\\
+
+        public string MenuInput()
+        {
+            Console.WriteLine("Hi! Welcome to the Recipe App!\nPress 1 to Create a new Recipe.\nPress 2 to View all your Recipes and then view one of them.\nPress 3 to change your Settings.");
+            Speak("Hi! Welcome to the Recipe App! Press 1 to Create a new Recipe. Press 2 to View all your Recipes and then view one of them. Press 3 to change your Settings.");
+            string input = Console.ReadLine();
+            return input;
+        }
 
         //Method to start the recipe creation process
-        public void Start()
+        public void Menu(string input)
         {
-            Settings();
-            ViewRecipe(CreateRecipe());
+            do
+            {
+                switch (input)
+                {
+                    case "1":
+                        CreateRecipe();
+                        continue;
+
+                    case "2":
+                        DisplayRecipes();
+                        continue;
+
+                    case "3":
+                        Settings();
+                        continue;
+
+                    case "4":
+                        System.Environment.Exit(0);
+                        continue;
+
+                    default:
+                        Console.WriteLine("\nPress 1 to Create a new Recipe.\nPress 2 to View all your Recipes and then view one of them.\nPress 3 to change your Settings.");
+                        Speak("Press 1 to Create a new Recipe. Press 2 to View all your Recipes and then view one of them. Press 3 to change your Settings.");
+                        Menu(MenuInput());
+                        break;
+
+                }
+            } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
         }
 
         //Method to configure user settings
@@ -126,6 +167,12 @@ namespace Prog6221_POE
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
             }
+            else
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+            }
 
             //Prompting user for usic prefernce
             message = "Would you like music? (yes/no)";
@@ -143,8 +190,38 @@ namespace Prog6221_POE
             {
                 PlayMusicAsync();
             }
+            else
+            {
+                StopMusic();
+            }
             Console.WriteLine("-------------------------------------------------------------------------------");
+            Menu(MenuInput());
         }
+
+        public async Task StopMusic()
+        {
+            // Array of songs
+            string[] songs = {"Silence.wav"};
+
+            // Use Task.Run to execute the music playing task asynchronously
+            await Task.Run(() =>
+            {
+                while (true)
+                {
+                    // Playing songs indefinitely
+                    foreach (string song in songs)
+                    {
+                        using (var MusicMan = new SoundPlayer(song))
+                        {
+                            MusicMan.Load();
+                            MusicMan.PlaySync();
+                        }
+                    }
+                }
+            });
+        }
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\\
 
         public async Task PlayMusicAsync()
         {
@@ -169,7 +246,9 @@ namespace Prog6221_POE
             });
         }
 
-        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\\
+
+
+ //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\\
 
         /// <summary>
         /// Method to speak a message if text-to-speech is enabled
@@ -246,7 +325,6 @@ namespace Prog6221_POE
 
                     case "3":
                         unit = Ingredient.Unit.cups;
-                        
                         break;
 
                     case "4":
@@ -266,32 +344,55 @@ namespace Prog6221_POE
 
             } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
 
-            message = "How many calories does this ingredient have?";
-            Console.WriteLine(message);
-            Speak(message);
-            double calories = 0;
-            while (calories <= 0)
-            {
-                try
-                {
-                    calories = Double.Parse(Console.ReadLine());
-                    TotalCalories += calories;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"{ex.Message}");
-                    Speak($"{ex.Message}");
-                    message = "Please Type in a Number. No Letters, Words or Phrases.";
-                    Console.WriteLine(message);
-                    Speak(message);
-                    continue;
-                }
-            }
+            TotalCalories = 0;
+            double calories = AddCalories();
 
-            message = "What food group does this ingredient belong to?";
+            message = "What food group does this ingredient belong to? (Type 1 for Carbohydrates. 2 for Fruits and Vegetables. 3 for Dry beans, peas, lentils and soya. 4 for Chicken, fish, meat and eggs. 5 for Dairy. 6 for Fats and Oil. 7 for Water)";
             Console.WriteLine(message);
             Speak(message);
-            string foodGroup = StringCheck();
+            string foodGroup = "";
+             do
+            {
+                input = Console.ReadLine();
+                switch (input)
+                {
+                    case "1":
+                        foodGroup = "Carbohydrates";
+                        break;
+
+                    case "2":
+                        foodGroup = "Fruits and Vegetables";
+                        break;
+
+                    case "3":
+                        foodGroup = "Dry beans, peas, lintels and soya";
+                        break;
+
+                    case "4":
+                        foodGroup = "Chicken, fish, meat and eggs";
+                        break;
+
+                    case "5":
+                        foodGroup = "Dairy";
+                        break;
+
+                    case "6":
+                        foodGroup = "Fats and Oil";
+                        break;
+
+                    case "7":
+                        foodGroup = "Water";
+                        break;
+
+                    default:
+                        //Prompting the user to select a valid option
+                        message = "Please type in a number from 1 - 7.";
+                        Console.WriteLine(message);
+                        Speak(message);
+                        continue;
+                }
+
+            } while (input != "1" && input != "2" && input != "3" && input != null);
 
             //Creating a new Ingredient object with user inputs
             Ingredient newIngredient = new Ingredient { name = name, quantity = quantity, unit = unit, otherUnit = other, scale = 1, calories = calories, foodGroup = foodGroup };
@@ -371,32 +472,54 @@ namespace Prog6221_POE
 
                 } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
 
-                message = "How many calories does this ingredient have?";
-                Console.WriteLine(message);
-                Speak(message);
-                newIngredient.calories = 0;
-                while (calories <= 0)
-                {
-                    try
-                    {
-                        newIngredient.calories = Double.Parse(Console.ReadLine());
-                        TotalCalories += newIngredient.calories;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"{ex.Message}");
-                        Speak($"{ex.Message}");
-                        message = "Please Type in a Number. No Letters, Words or Phrases.";
-                        Console.WriteLine(message);
-                        Speak(message);
-                        continue;
-                    }
-                }
+                newIngredient.calories = AddCalories();
 
-                message = "What food group does this ingredient belong to?";
+                message = "What food group does this ingredient belong to? (Type 1 for Carbohydrates. 2 for Fruits and Vegetables. 3 for Dry beans, peas, lentils and soya. 4 for Chicken, fish, meat and eggs. 5 for Dairy. 6 for Fats and Oil. 7 for Water)";
                 Console.WriteLine(message);
                 Speak(message);
-                newIngredient.foodGroup = StringCheck();
+                do
+                {
+                    input = Console.ReadLine();
+                    switch (input)
+                    {
+                        case "1":
+                            newIngredient.foodGroup = "Carbohydrates";
+                            break;
+
+                        case "2":
+                            newIngredient.foodGroup = "Fruits and Vegetables";
+                            break;
+
+                        case "3":
+                            newIngredient.foodGroup = "Dry beans, peas, lintels and soya";
+                            break;
+
+                        case "4":
+                            newIngredient.foodGroup = "Chicken, fish, meat and eggs";
+                            break;
+
+                        case "5":
+                            newIngredient.foodGroup = "Dairy";
+                            break;
+
+                        case "6":
+                            newIngredient.foodGroup = "Fats and Oil";
+                            break;
+
+                        case "7":
+                            newIngredient.foodGroup = "Water";
+                            break;
+
+                        default:
+                            //Prompting the user to select a valid option
+                            message = "Please type in a number from 1 - 7.";
+                            Console.WriteLine(message);
+                            Speak(message);
+                            continue;
+                    }
+
+                } while (input != "1" && input != "2" && input != "3" && input != "4" && input != "5" && input != "6" && input != "7" && input != null);
+
 
                 //Adding the new ingredient to the list of ingredients
                 Ingredients.Add(newIngredient);
@@ -404,6 +527,36 @@ namespace Prog6221_POE
         }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------\\
+
+        public double AddCalories()
+        {
+            message = "How many calories does this ingredient have?";
+            Console.WriteLine(message);
+            Speak(message);
+            double calories = 0;
+            while (calories <= 0)
+            {
+                try
+                {
+                    calories = Double.Parse(Console.ReadLine());
+                    TotalCalories += calories;
+                    ColourSwitch(TotalCalories);
+                    Console.WriteLine(NotifyCalories(TotalCalories));
+                    Speak(NotifyCalories(TotalCalories));
+                    ColourReset();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{ex.Message}");
+                    Speak($"{ex.Message}");
+                    message = "Please Type in a Number. No Letters, Words or Phrases.";
+                    Console.WriteLine(message);
+                    Speak(message);
+                    continue;
+                }
+            }
+            return calories;
+        }
 
         //Method to input steps for the recipe
         public void InputStep()
@@ -465,6 +618,14 @@ namespace Prog6221_POE
         //Method to create a new recipe
         public Recipes CreateRecipe()
         {
+            Recipes recipe = new Recipes();
+            //Resetting the recipe before adding a new recipe
+            recipe.RecipeName = "";
+            recipe.Ingredients.Clear();
+            recipe.NumOfIngredients = 0;
+            recipe.Steps.Clear();
+            recipe.Scale = 0;
+            recipe.NumOfSteps = 0;
 
             //Asking for the name of the recipe
             message = "What is the name of your recipe?";
@@ -476,6 +637,7 @@ namespace Prog6221_POE
             message = "How many different types of ingredients will you use? (For Example, if your recipe requires 3 Apples and 1 Banana then you will use 2 ingredients.)";
             Console.WriteLine(message);
             Speak(message);
+            NumOfIngredients = 0;
             while (NumOfIngredients == 0)
             {
                 try
@@ -507,13 +669,19 @@ namespace Prog6221_POE
             Scale = 1;
 
             //Creating a new recipe object
-            Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, NumOfSteps, Scale);
+            Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, TotalCalories, Steps, NumOfSteps, Scale);
 
             //Adding the recipe to the recipe list
-            RecipeList.Add(recipes);
+            RecipeList.Add(RecipeName, recipes);
 
             //Sorting the Recipe List
-            RecipeList.Sort();
+            RecipeList.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            //Views the Recipe after creating it
+            ViewRecipe(recipes);
+
+            //Return to the menu
+            Menu(MenuInput());
 
             return recipes;
         }
@@ -659,6 +827,7 @@ namespace Prog6221_POE
                "\n---------------------------------------------------------------------" +
                 "\nScale: " + recipes.Scale +
                "\n" + recipes.NumOfIngredients + " Ingredients" +
+               "\nCalories: " + TotalCalories +
                "\n\n" + "Ingredients: " +
                "\n==============");
             foreach (var Ingredients in recipes.Ingredients)
@@ -676,7 +845,7 @@ namespace Prog6221_POE
             Console.Write("Finish!\nEnjoy!!!");
 
             //Speaking the recipe details
-            Speak("Recipe:" + recipes.RecipeName + "Scale: " + recipes.Scale + ". " + recipes.NumOfIngredients + "Ingredients. Ingredients:");
+            Speak("Recipe:" + recipes.RecipeName + "Scale: " + recipes.Scale + ". " + recipes.NumOfIngredients + "Ingredients. This recipe has " + TotalCalories + " calories. Ingredients:");
             foreach (var Ingredients in recipes.Ingredients)
             {
                 Speak(Ingredients.ToString());
@@ -741,32 +910,15 @@ namespace Prog6221_POE
             {
                 ResetRecipe(recipes);
             }
-
-            //Asking the user if they want to create a new recipe
-            message = "Would you like to create a new recipe? (Yes/No)";
-            Console.WriteLine(message);
-            Speak(message);
-            answer = StringCheck();
-            while (answer.ToLower() != "yes" && answer.ToLower() != "no")
-            {
-                message = "Please only type in Yes or No";
-                Console.WriteLine(message);
-                Speak(message);
-                answer = StringCheck();
-            }
-            if (answer == "yes")
-            {
-                CreateRecipe();
-                ViewRecipe(recipes);
-            }
             else
             {
-                //Exiting the application
-                message = "Thank you for using the app! Press Enter to Exit.";
+                //Return to the menu
+                message = "Press Enter when you are ready to go back to the menu";
                 Console.WriteLine(message);
                 Speak(message);
                 Console.ReadKey();
-                Environment.Exit(0);
+
+                Menu(MenuInput());
             }
 
         }
@@ -835,6 +987,7 @@ namespace Prog6221_POE
             //Resetting the recipe if confirmed
             if (answer == "yes")
             {
+                RecipeList.Remove(recipe.RecipeName);
                 //Resetting recipe properties
                 recipe.RecipeName = "";
                 recipe.Ingredients.Clear();
@@ -844,7 +997,7 @@ namespace Prog6221_POE
                 recipe.NumOfSteps = 0;
 
                 //Creating a new instance of Recipes class
-                Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
+                Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, 0, Steps, 0, 0);
             }
 
             //Displaying the updated (empty) recipe
@@ -857,22 +1010,23 @@ namespace Prog6221_POE
         /// </summary>
         public void SearchRecipe()
         {
-            string answer = StringCheck();
-            foreach (var Recipes in RecipeList)
-            {
-                if (Recipes.RecipeName == answer)
-                {
-                    ViewRecipe(Recipes);
-                    break;
-                }
-                else
-                {
-                    message = "There is no recipe with the name " + answer;
-                    Console.WriteLine(message);
-                    Speak(message);
-                }
-            }
+            // Asking for the name of the recipe to search for
+            Console.WriteLine("Enter the name of the recipe you want to search for:");
+            string searchName = Console.ReadLine();
 
+            // Check if the recipe exists in the RecipeList dictionary
+            if (RecipeList.ContainsKey(searchName))
+            {
+                // If found, display the recipe details
+                Console.WriteLine("Recipe found!");
+                ViewRecipe(RecipeList[searchName]); // Assuming ViewRecipe() method exists to display recipe details
+            }
+            else
+            {
+                // If not found, display a message
+                Console.WriteLine("Recipe not found. Please check the spelling or try another name.");
+                Menu(MenuInput());
+            }
         }
         //--------------------------------------------------------------------------------------------------------------------------------\\
 
@@ -883,33 +1037,77 @@ namespace Prog6221_POE
         {
             Console.WriteLine("Recipes\n*********************************");
             Speak("Recipes");
-            foreach (var Recipe in RecipeList)
+            foreach (var recipeName in RecipeList.Keys)
             {
-                Console.WriteLine(Recipe.RecipeName += "\n");
-                Speak(Recipe.RecipeName);
+                Console.WriteLine(recipeName + "\n");
+                Speak(recipeName);
+            }
+            SearchRecipe(); //Allows the user to look for a specific recipe after
+        }
+//--------------------------------------------------------------------------------------------------------------------------------\\
+
+        /// <summary>
+        /// Notifies the user when they reached over 300 calories
+        /// </summary>
+        /// <param name="calories"></param>
+        /// <returns></returns>
+        public static string NotifyCalories(double calories)
+        {
+            string notification;
+
+            if (calories >= 300)
+            {
+                notification = "THIS RECIPE HAS REACHED 300 CALORIES!! YOU SHOULD RE-EVALUATE YOUR RECIPE IF YOU WANT LESS THAN 300 CALORIES!\nYou have " + calories + " calories in your recipe so far";
+                return notification;
+            }
+            else
+            {
+                if (calories >= 200)
+                {
+                    notification = "YOU ARE CLOSE TO 300 CALORIES!! YOU SHOULD RE-EVALUATE YOUR RECIPE IF YOU WANT LESS THAN 300 CALORIES!\nYou have " + calories + " calories in your recipe so far";
+                    return notification;
+                }
+            }
+            notification = "You have " + calories + " calories in your recipe so far";
+            return notification;
+        }
+//--------------------------------------------------------------------------------------------------------------------------------\\
+
+        /// <summary>
+        /// Will switch the colour during the calorie notification
+        /// </summary>
+        /// <param name="calories"></param>
+        public void ColourSwitch(double calories)
+        { 
+            if (calories >= 300)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                if (calories >= 200)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
             }
         }
 //--------------------------------------------------------------------------------------------------------------------------------\\
 
-        public void CheckcCalories()
-        {
-            if (TotalCalories > 300)
+        /// <summary>
+        /// Resets the colour
+        /// </summary>
+        public void ColourReset()
+        { 
+            if (dark.ToLower() == "light")
             {
-                message = "THIS RECIPE HAS REACHED 300 CALORIES!! YOU SHOULD RE-EVALUATE YOUR RECIPE IF YOU WANT LESS THAN 300 CALORIES";
-                if (dark == "dark")
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine(message);
-                    Speak(message);
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(message);
-                    Speak(message);
-                }
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
+
 
     }
 }
