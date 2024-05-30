@@ -8,6 +8,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Runtime.Remoting.Lifetime;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Prog6221_POE
 {
@@ -18,17 +19,19 @@ namespace Prog6221_POE
 
         public int NumOfIngredients { get; set; }
 
+        public List<Recipes> RecipeList { get; set; } = new List<Recipes>();
+
         public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>(); // List to store ingredients
 
-        public Ingredient[] IngredientArray { get; set; } //Array to store ingredeints
-
         public List<Step> Steps { get; set; } = new List<Step>(); // List to store steps
-
-        Step[] StepArray { get; set; }//Array to store steps
 
         public int NumOfSteps { get; set; }
 
         public double Scale { get; set; }
+
+        public double TotalCalories { get; set; }
+
+        delegate void CalorieChecker();
 
         //SpeechSynthesizer for text-to-speech functionality
         SpeechSynthesizer talk = new SpeechSynthesizer();
@@ -38,6 +41,8 @@ namespace Prog6221_POE
 
         //Message string for communication with the user
         public string message { get; set; }
+
+        public string dark { get; set; }
 
         //SoundPlayer for playing music
         public System.Media.SoundPlayer MusicMan = new SoundPlayer();
@@ -51,10 +56,11 @@ namespace Prog6221_POE
         /// <param name="recipeName"></param>
         /// <param name="numOfIngredients"></param>
         /// <param name="ingredients"></param>
+        /// <param name="tcal"></param>
         /// <param name="steps"></param>
         /// <param name="stepNum"></param>
         /// <param name="scale"></param>
-        public Recipes(string recipeName, int numOfIngredients, List<Ingredient> ingredients, List<Step> steps, int stepNum, double scale)
+        public Recipes(string recipeName, int numOfIngredients, List<Ingredient> ingredients, double tcal, List<Step> steps, int stepNum, double scale)
         {
             RecipeName = recipeName;
             Ingredients = ingredients;
@@ -62,6 +68,7 @@ namespace Prog6221_POE
             Steps = steps;
             NumOfSteps = stepNum;
             Scale = scale;
+            TotalCalories = tcal;
         }
 
         //------------------------------------------------------------------------------------------------------------------------------------------------------\\
@@ -70,8 +77,7 @@ namespace Prog6221_POE
         public void Start()
         {
             Settings();
-            CreateRecipe();
-            ViewRecipe();
+            ViewRecipe(CreateRecipe());
         }
 
         //Method to configure user settings
@@ -81,12 +87,12 @@ namespace Prog6221_POE
             Console.WriteLine("Would you like text-to-speech? (yes/no)");
             talk.Speak("Would you like text-to-speech? (yes/no)");
             string answer = StringCheck();
-            if (answer.ToLower() != "yes" && answer.ToLower() != "no")
+            while (answer.ToLower() != "yes" && answer.ToLower() != "no")
             {
                 message = "Please only type in Yes or No";
                 Console.WriteLine(message);
                 talk.Speak(message);
-                Settings();
+                answer = StringCheck();
             }
             if (answer.ToLower() == "yes")
             {
@@ -105,15 +111,15 @@ namespace Prog6221_POE
             message = "Would you like dark or light mode? Please type in only 'dark' or 'light'.";
             Console.WriteLine(message);
             Speak(message);
-            answer = StringCheck();
-            while (answer.ToLower() != "light" && answer.ToLower() != "dark")
+            dark = StringCheck();
+            while (dark.ToLower() != "light" && dark.ToLower() != "dark")
             {
                 message = "Please only type in Light or Dark";
                 Console.WriteLine(message);
                 talk.Speak(message);
-                answer = StringCheck();
+                dark = StringCheck();
             }
-            if (answer.ToLower() == "light")
+            if (dark.ToLower() == "light")
             {
                 
                 Console.BackgroundColor = ConsoleColor.White;
@@ -239,7 +245,7 @@ namespace Prog6221_POE
                         break;
 
                     case "3":
-                                unit = Ingredient.Unit.cups;
+                        unit = Ingredient.Unit.cups;
                         
                         break;
 
@@ -260,8 +266,35 @@ namespace Prog6221_POE
 
             } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
 
+            message = "How many calories does this ingredient have?";
+            Console.WriteLine(message);
+            Speak(message);
+            double calories = 0;
+            while (calories <= 0)
+            {
+                try
+                {
+                    calories = Double.Parse(Console.ReadLine());
+                    TotalCalories += calories;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{ex.Message}");
+                    Speak($"{ex.Message}");
+                    message = "Please Type in a Number. No Letters, Words or Phrases.";
+                    Console.WriteLine(message);
+                    Speak(message);
+                    continue;
+                }
+            }
+
+            message = "What food group does this ingredient belong to?";
+            Console.WriteLine(message);
+            Speak(message);
+            string foodGroup = StringCheck();
+
             //Creating a new Ingredient object with user inputs
-            Ingredient newIngredient = new Ingredient { name = name, quantity = quantity, unit = unit, otherUnit = other, scale = 1 };
+            Ingredient newIngredient = new Ingredient { name = name, quantity = quantity, unit = unit, otherUnit = other, scale = 1, calories = calories, foodGroup = foodGroup };
 
             //Adding the new ingredient to the list of ingredients
             Ingredients.Add(newIngredient);
@@ -318,9 +351,8 @@ namespace Prog6221_POE
                             break;
 
                         case "3":
-                            
-                                newIngredient.unit = Ingredient.Unit.cups;
-                                                        break;
+                            newIngredient.unit = Ingredient.Unit.cups;
+                            break;
 
                         case "4":
                             message = "What unit of measurement would you like to use?";
@@ -339,12 +371,36 @@ namespace Prog6221_POE
 
                 } while (input != "1" && input != "2" && input != "3" && input != "4" && input != null);
 
+                message = "How many calories does this ingredient have?";
+                Console.WriteLine(message);
+                Speak(message);
+                newIngredient.calories = 0;
+                while (calories <= 0)
+                {
+                    try
+                    {
+                        newIngredient.calories = Double.Parse(Console.ReadLine());
+                        TotalCalories += newIngredient.calories;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"{ex.Message}");
+                        Speak($"{ex.Message}");
+                        message = "Please Type in a Number. No Letters, Words or Phrases.";
+                        Console.WriteLine(message);
+                        Speak(message);
+                        continue;
+                    }
+                }
+
+                message = "What food group does this ingredient belong to?";
+                Console.WriteLine(message);
+                Speak(message);
+                newIngredient.foodGroup = StringCheck();
+
                 //Adding the new ingredient to the list of ingredients
                 Ingredients.Add(newIngredient);
             }
-
-            //Converting the list of ingredients to an array
-            IngredientArray = Ingredients.ToArray();
         }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------\\
@@ -402,15 +458,12 @@ namespace Prog6221_POE
 
             //Removing the last step, as it's the termination marker "XXX"
             Steps.RemoveAt(NumOfSteps - 1);
-
-            //Converting the list of steps to an array
-            StepArray = Steps.ToArray();
         }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------\\
 
         //Method to create a new recipe
-        public void CreateRecipe()
+        public Recipes CreateRecipe()
         {
 
             //Asking for the name of the recipe
@@ -455,6 +508,14 @@ namespace Prog6221_POE
 
             //Creating a new recipe object
             Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, NumOfSteps, Scale);
+
+            //Adding the recipe to the recipe list
+            RecipeList.Add(recipes);
+
+            //Sorting the Recipe List
+            RecipeList.Sort();
+
+            return recipes;
         }
 
 //---------------------------------------------------------------------------------------------------------------------------------------\\
@@ -549,7 +610,7 @@ namespace Prog6221_POE
         /// Method to scale the recipe ingredients based on the given factor
         /// </summary>
         /// <param name="scale"></param>
-        public void ScaleRecipe(double scale)
+        public void ScaleRecipe(double scale, Recipes recipes)
         {
             //Constraits for conversion factors between different units
             const double TSP_PER_TBSP = 3.0;
@@ -560,7 +621,7 @@ namespace Prog6221_POE
             Scale *= scale;
 
             //Scaling wach ingredient in the recipe
-            foreach (var ingredient in Ingredients)
+            foreach (var ingredient in recipes.Ingredients)
             {
                 //Scaling the quantity of the ingredient
                 ingredient.quantity *= scale;
@@ -583,31 +644,31 @@ namespace Prog6221_POE
                 }
             }
             //Displaying the updated recipe after scaling
-            ViewRecipe();
+            ViewRecipe(recipes);
         }
 
         //----------------------------------------------------------------------------------------------------------------------------------------\\
 
         //Method to display the recipe details and provide options for scaling, resetting or creating a new recipe
-        public void ViewRecipe()
+        public void ViewRecipe(Recipes recipes)
         {
             //Displaying recipe details
             Console.WriteLine("\n\nRecipe: " +
                "\n***************************************************************" +
-               "\n" + RecipeName + ": " +
+               "\n" + recipes.RecipeName + ": " +
                "\n---------------------------------------------------------------------" +
-                "\nScale: " + Scale +
-               "\n" + NumOfIngredients + " Ingredients" +
+                "\nScale: " + recipes.Scale +
+               "\n" + recipes.NumOfIngredients + " Ingredients" +
                "\n\n" + "Ingredients: " +
                "\n==============");
-            foreach (var Ingredients in IngredientArray)
+            foreach (var Ingredients in recipes.Ingredients)
             {
                 Console.WriteLine(Ingredients.ToString());
             }
             Console.WriteLine("\nInstructions: " +
                 "\n==============");
             int i = 1;
-            foreach (var Step in StepArray)
+            foreach (var Step in recipes.Steps)
             {
                 Console.WriteLine(i + ". " + Step.ToString());
                 i++;
@@ -615,14 +676,14 @@ namespace Prog6221_POE
             Console.Write("Finish!\nEnjoy!!!");
 
             //Speaking the recipe details
-            Speak("Recipe:" + RecipeName + "Scale: " + Scale + ". " + NumOfIngredients + "Ingredients. Ingredients:");
-            foreach (var Ingredients in IngredientArray)
+            Speak("Recipe:" + recipes.RecipeName + "Scale: " + recipes.Scale + ". " + recipes.NumOfIngredients + "Ingredients. Ingredients:");
+            foreach (var Ingredients in recipes.Ingredients)
             {
                 Speak(Ingredients.ToString());
             }
             Speak("\nInstructions: ");
             i = 1;
-            foreach (var Step in StepArray)
+            foreach (var Step in recipes.Steps)
             {
                 Speak("Step" + i + ". " + Step.ToString());
                 i++;
@@ -638,13 +699,13 @@ namespace Prog6221_POE
             {
                 message = "Please only type in Yes or No";
                 Console.WriteLine(message);
-                talk.Speak(message);
+                Speak(message);
                 answer = StringCheck();
             }
             if (answer.ToLower() == "yes")
             {
                 double scale = GetScale();
-                ScaleRecipe(scale);
+                ScaleRecipe(scale, recipes);
             }
 
             //Asking the user if they want to reset the scale
@@ -656,12 +717,12 @@ namespace Prog6221_POE
             {
                 message = "Please only type in Yes or No";
                 Console.WriteLine(message);
-                talk.Speak(message);
+                Speak(message);
                 answer = StringCheck();
             }
             if (answer.ToLower() == "yes")
             {
-                ResetScale();
+                ResetScale(recipes);
             }
 
             //Asking the user if they want to rest the recipe
@@ -673,16 +734,16 @@ namespace Prog6221_POE
             {
                 message = "Please only type in Yes or No";
                 Console.WriteLine(message);
-                talk.Speak(message);
+                Speak(message);
                 answer = StringCheck();
             }
             if (answer.ToLower() == "yes")
             {
-                ResetRecipe();
+                ResetRecipe(recipes);
             }
 
             //Asking the user if they want to create a new recipe
-            message = "Would you like to create a new recipe?";
+            message = "Would you like to create a new recipe? (Yes/No)";
             Console.WriteLine(message);
             Speak(message);
             answer = StringCheck();
@@ -690,13 +751,13 @@ namespace Prog6221_POE
             {
                 message = "Please only type in Yes or No";
                 Console.WriteLine(message);
-                talk.Speak(message);
+                Speak(message);
                 answer = StringCheck();
             }
             if (answer == "yes")
             {
                 CreateRecipe();
-                ViewRecipe();
+                ViewRecipe(recipes);
             }
             else
             {
@@ -705,6 +766,7 @@ namespace Prog6221_POE
                 Console.WriteLine(message);
                 Speak(message);
                 Console.ReadKey();
+                Environment.Exit(0);
             }
 
         }
@@ -712,7 +774,7 @@ namespace Prog6221_POE
 //-------------------------------------------------------------------------------------------------------------------------------\\
 
         //Method to reset the scaling of the recipe
-        public void ResetScale()
+        public void ResetScale(Recipes recipes)
         {
             //Constants for conversion rates
             const double TSP_PER_TBSP = 3.0;
@@ -720,8 +782,8 @@ namespace Prog6221_POE
             const double TSP_PER_CUP = TSP_PER_TBSP * TBSP_PER_CUP;
 
             //Calculating the inverse scale to reset the quantities
-            double inverseScale = 1 / Scale;
-            foreach (var ingredient in Ingredients)
+            double inverseScale = 1 / recipes.Scale;
+            foreach (var ingredient in recipes.Ingredients)
             {
                 //Resetting the quantity of each ingredient
                 ingredient.quantity *= inverseScale;
@@ -748,13 +810,13 @@ namespace Prog6221_POE
             Scale = 1;
 
             //Displaying the updated recipe
-            ViewRecipe();
+            ViewRecipe(recipes);
         }
 
 //--------------------------------------------------------------------------------------------------------------------------------\\
 
         //Method to reset the entire recipe
-        public void ResetRecipe()
+        public void ResetRecipe(Recipes recipe)
         {
 
             //Asking for confirmation before resetting
@@ -766,7 +828,7 @@ namespace Prog6221_POE
             {
                 message = "Please only type in Yes or No";
                 Console.WriteLine(message);
-                talk.Speak(message);
+                Speak(message);
                 answer = StringCheck();
             }
 
@@ -774,24 +836,81 @@ namespace Prog6221_POE
             if (answer == "yes")
             {
                 //Resetting recipe properties
-                RecipeName = "";
-                Array.Clear(IngredientArray, 0, NumOfIngredients);
-                Ingredients.Clear();
-                IngredientArray = Ingredients.ToArray(); //Resetting the Array
-                NumOfIngredients = 0;
-                Array.Clear(StepArray, 0, NumOfSteps - 1);
-                Steps.Clear();
-                StepArray = Steps.ToArray(); //Resetting the Array
-                Scale = 0;
-                NumOfSteps = 0;
+                recipe.RecipeName = "";
+                recipe.Ingredients.Clear();
+                recipe.NumOfIngredients = 0;
+                recipe.Steps.Clear();
+                recipe.Scale = 0;
+                recipe.NumOfSteps = 0;
 
                 //Creating a new instance of Recipes class
                 Recipes recipes = new Recipes(RecipeName, NumOfIngredients, Ingredients, Steps, 0, 0);
             }
 
             //Displaying the updated (empty) recipe
-            ViewRecipe();
+            ViewRecipe(recipe);
         }
+//--------------------------------------------------------------------------------------------------------------------------------\\
+
+        /// <summary>
+        /// This Method searches for the recipe that the user is looking for then displays it.
+        /// </summary>
+        public void SearchRecipe()
+        {
+            string answer = StringCheck();
+            foreach (var Recipes in RecipeList)
+            {
+                if (Recipes.RecipeName == answer)
+                {
+                    ViewRecipe(Recipes);
+                    break;
+                }
+                else
+                {
+                    message = "There is no recipe with the name " + answer;
+                    Console.WriteLine(message);
+                    Speak(message);
+                }
+            }
+
+        }
+        //--------------------------------------------------------------------------------------------------------------------------------\\
+
+        /// <summary>
+        /// This method will displays all the recipes in alphabetical order (hopefully).
+        /// </summary>
+        public void DisplayRecipes()
+        {
+            Console.WriteLine("Recipes\n*********************************");
+            Speak("Recipes");
+            foreach (var Recipe in RecipeList)
+            {
+                Console.WriteLine(Recipe.RecipeName += "\n");
+                Speak(Recipe.RecipeName);
+            }
+        }
+//--------------------------------------------------------------------------------------------------------------------------------\\
+
+        public void CheckcCalories()
+        {
+            if (TotalCalories > 300)
+            {
+                message = "THIS RECIPE HAS REACHED 300 CALORIES!! YOU SHOULD RE-EVALUATE YOUR RECIPE IF YOU WANT LESS THAN 300 CALORIES";
+                if (dark == "dark")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine(message);
+                    Speak(message);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(message);
+                    Speak(message);
+                }
+            }
+        }
+
     }
 }
 //----------------------------------------------------------------------4949449494949494___END-OF-FILE___494994949494944949----------------------------------------------------------------------------------------------------\\

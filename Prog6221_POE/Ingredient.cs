@@ -28,6 +28,10 @@ namespace Prog6221_POE
 
         public string otherUnit { get; set; }
 
+        public double calories { get; set; }
+
+        public string foodGroup { get; set; }
+
         //Default Constructor
         public Ingredient() { }
 
@@ -40,13 +44,17 @@ namespace Prog6221_POE
         /// <param name="scle"></param>
         /// <param name="u"></param>
         /// <param name="oUnit"></param>
-        public Ingredient(string nme, double qnty, double scle, Unit u, string oUnit)
+        /// <param name="cal"></param>
+        /// <param name="fgrp"></param>
+        public Ingredient(string nme, double qnty, double scle, Unit u, string oUnit, double cal, string fgrp)
         {
             name = nme;
             quantity = qnty;
             scale = scle;
             unit = u;
             otherUnit = oUnit;
+            calories = cal;
+            foodGroup = fgrp;
         }
 
 //-----------------------------------------------------------------------------------------\\
