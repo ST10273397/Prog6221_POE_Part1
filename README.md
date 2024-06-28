@@ -1,4 +1,6 @@
-Welcome to Nicholas Wolfaardt's (ST10273397) ReadMe file for his PROG6221 POE for Part 1!
+Welcome to Nicholas Wolfaardt's (ST10273397) ReadMe file for his PROG6221 POE for Part 2!
+
+This is a recipe app that will help you create recipes, ingredients and steps for you to keep and see for your next cooking time. 
 
 How to run the Application:
 1. Download the Zip file
@@ -9,7 +11,7 @@ How to run the Application:
 6. Select the extracted file
 7. Open the File
 8. Click on the Run button to run my application
-Thank you for readinh
+Thank you for reading
 
 References:
 blackbox.ai, 
