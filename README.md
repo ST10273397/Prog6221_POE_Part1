@@ -1,4 +1,12 @@
-Welcome to Nicholas Wolfaardt's (ST10273397) ReadMe file for his PROG6221 POE for Part 2!
+Welcome to Nicholas Wolfaardt's (ST10273397) ReadMe file for his PROG6221 POE for Part 3!
+
+Updates:
+• Flow imoroved now that GUI is involved
+• The recipes are all now in order and the recioes should show the correct ingredients for each recipe.
+• All food groups should be able to be shown and used for each ingredient 
+• The total calories are now shown coreectly for each recipe
+• Both logic and comments has imoroved greatly
+• ReadMe file has improved with updates and a user manual has been included.
 
 This is a recipe app that will help you create recipes, ingredients and steps for you to keep and see for your next cooking time. 
 
