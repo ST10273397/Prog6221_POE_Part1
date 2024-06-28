@@ -1,0 +1,42 @@
+﻿<Page x:Class="POE_Prog.DisplayRecipesxaml"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:POE_Prog"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="DisplayRecipesxaml">
+
+    <Grid Background="#FFF7ECA1">
+        <ListBox x:Name="lstRecipes" Margin="10" BorderBrush="Black" BorderThickness="1" Background="{x:Null}" FontFamily="Pristina" FontSize="22">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Padding="5" Width="750">
+                        <StackPanel>
+                            <!-- Recipe Name -->
+                            <TextBlock Text="{Binding RecipeName}" FontWeight="Bold" FontSize="16" TextWrapping="Wrap"/>
+
+                            <!-- Number of Ingredients -->
+                            <TextBlock Text="{Binding NumOfIngredients, StringFormat='Number of Ingredients: {0}'}" TextWrapping="Wrap"/>
+
+                            <!-- Ingredients -->
+                            <ItemsControl ItemsSource="{Binding Ingredients}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding name}" FontWeight="Bold" FontSize="16" FontFamily="Pristina" Style="{StaticResource NormalTextBlok}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Total Calories -->
+                            <TextBlock Text="{Binding Calories, StringFormat='Calories: {0}'}" FontWeight="Bold" FontSize="16" FontFamily="Pristina" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Page>

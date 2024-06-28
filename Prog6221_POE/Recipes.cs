@@ -281,7 +281,7 @@ namespace Prog6221_POE
             Speak(message);
             name = StringCheck();
 
-            //Prompting tuser for the quantity of the ingredient
+            //Prompting user for the quantity of the ingredient
             message = "How Much/Many of the Ingredient Will You Use? (Don't type in the Unit of Measurement)";
             Console.WriteLine(message);
             Speak(message);
@@ -347,7 +347,7 @@ namespace Prog6221_POE
             TotalCalories = 0;
             double calories = AddCalories();
 
-            message = "What food group does this ingredient belong to? (Type 1 for Carbohydrates. 2 for Fruits and Vegetables. 3 for Dry beans, peas, lentils and soya. 4 for Chicken, fish, meat and eggs. 5 for Dairy. 6 for Fats and Oil. 7 for Water)";
+            message = "What food group does this ingredient belong to?\n(Type 1 for Carbohydrates. 2 for Fruits and Vegetables. 3 for Dry beans, peas, lentils and soya. 4 for Chicken, fish, meat and eggs. 5 for Dairy. 6 for Fats and Oil. 7 for Water)";
             Console.WriteLine(message);
             Speak(message);
             string foodGroup = "";
@@ -474,7 +474,7 @@ namespace Prog6221_POE
 
                 newIngredient.calories = AddCalories();
 
-                message = "What food group does this ingredient belong to? (Type 1 for Carbohydrates. 2 for Fruits and Vegetables. 3 for Dry beans, peas, lentils and soya. 4 for Chicken, fish, meat and eggs. 5 for Dairy. 6 for Fats and Oil. 7 for Water)";
+                message = "What food group does this ingredient belong to?\nType 1 for Carbohydrates.\n2 for Fruits and Vegetables.\n3 for Dry beans, peas, lentils and soya.\n4 for Chicken, fish, meat and eggs.\n5 for Dairy.\n6 for Fats and Oil.\n7 for Water)";
                 Console.WriteLine(message);
                 Speak(message);
                 do

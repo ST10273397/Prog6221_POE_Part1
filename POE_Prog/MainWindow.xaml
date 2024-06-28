@@ -1,0 +1,15 @@
+﻿<Window x:Class="POE_Prog.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:POE_Prog"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Background="#FFF7ECA1">
+        <Label x:Name="lblWelcome" Content="Welcome to My Recipe App" Style="{StaticResource HeadingLabel}"/>
+        <Button x:Name="btnStart" Content="Open" HorizontalAlignment="Center" Height="61" Margin="0,136,0,0" VerticalAlignment="Top" Width="382" Style="{StaticResource StickerButton}" Click="btnStart_Click"/>
+        <Button x:Name="btnExit" Content="Exit" HorizontalAlignment="Center" Height="61" Margin="0,217,0,0" VerticalAlignment="Top" Width="382" Style="{StaticResource ResourceKey=StickerButton}" Click="btnExit_Click"/>
+        <Frame x:Name="startFrame"/>
+    </Grid>
+</Window>

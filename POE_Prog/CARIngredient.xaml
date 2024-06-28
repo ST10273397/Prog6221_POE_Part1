@@ -1,0 +1,107 @@
+﻿<Page x:Class="POE_Prog.CARIngredient"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:POE_Prog"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="CARIngredient">
+
+    <Grid Background="#FFF7ECA1">
+        <!-- Grid Column Definitions -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Grid Row Definitions -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="21*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Page Heading Label -->
+        <Label x:Name="lblHeading" Content="Creating A Recipe" Style="{StaticResource HeadingLabel}" Grid.ColumnSpan="2" Margin="189,-1,0,377" VerticalAlignment="Top" Grid.RowSpan="2" HorizontalAlignment="Center" Width="307"/>
+
+        <!-- Left Column StackPanel -->
+        <StackPanel Grid.Row="1">
+            <!-- Recipe Name Label -->
+            <Label x:Name="lblRecipeName" Content="Recipe Name:" Style="{StaticResource ResourceKey=NormalLabel}" Width="401" HorizontalContentAlignment="Right" Height="53" FontSize="30"/>
+            <!-- Ingredients Label -->
+            <Label x:Name="lblIngredients" Content="Ingredients:" Style="{StaticResource NormalLabel}" Height="49" HorizontalContentAlignment="Left" FontSize="30" Width="399"/>
+            <!-- Ingredients ListBox -->
+            <ListBox x:Name="lstIngredients" Height="253" Width="375" d:ItemsSource="{d:SampleData ItemCount=5}" BorderBrush="Black" BorderThickness="3" FontFamily="Pristina" FontSize="22"/>
+        </StackPanel>
+
+        <!-- Right Column StackPanel -->
+        <StackPanel Grid.Column="1" Grid.Row="1">
+            <!-- Recipe Name TextBox -->
+            <TextBox x:Name="txtRecipeName" Style="{StaticResource NormalTextBox}" Text="Recipe Name" Background="White" BorderBrush="Black" BorderThickness="3" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Height="50" Width="401" FontSize="30"/>
+            <!-- Ingredient Name TextBox -->
+            <TextBox x:Name="txtIngredientName" TextWrapping="Wrap" Text="Ingredient Name" Width="399" Style="{StaticResource NormalTextBox}" Height="49" FontSize="30"/>
+
+            <!-- Quantity and Measurement StackPanel -->
+            <StackPanel Height="42" Orientation="Horizontal" Width="399">
+                <!-- Quantity TextBox -->
+                <TextBox x:Name="txtQuantity" TextWrapping="Wrap" Text="Quantity" Width="193" Style="{StaticResource ResourceKey=NormalTextBox}" Height="51" FontSize="30"/>
+                <!-- Measurement ComboBox -->
+                <ComboBox x:Name="cmboMeasurement" Width="209" Height="56" BorderBrush="Black" BorderThickness="3" SelectedIndex="0" FontFamily="Pristina" FontSize="30">
+                    <ComboBox.Background>
+                        <LinearGradientBrush EndPoint="0,1">
+                            <GradientStop Color="#FFF0F0F0"/>
+                            <GradientStop Color="White" Offset="1"/>
+                        </LinearGradientBrush>
+                    </ComboBox.Background>
+                    <ComboBoxItem Background="White" BorderBrush="Black" Content="Measurement" FontFamily="Pristina" FontSize="22"/>
+                    <ComboBoxItem Background="White" BorderBrush="Black" Content="Tsps" FontFamily="Pristina" FontSize="22"/>
+                    <ComboBoxItem Background="White" BorderBrush="Black" Content="Tbsps" FontFamily="Pristina" FontSize="22"/>
+                    <ComboBoxItem Background="White" BorderBrush="Black" Content="Cups" FontFamily="Pristina" FontSize="22"/>
+                    <ComboBoxItem Background="White" BorderBrush="Black" Content="Other" FontFamily="Pristina" FontSize="22"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Other Measurement TextBox -->
+            <TextBox x:Name="txtOtherMeasurement" TextWrapping="Wrap" Text="Please Specify if Other" Width="405" Style="{StaticResource ResourceKey=NormalTextBox}" Height="45" FontSize="30"/>
+
+            <!-- Calories StackPanel -->
+            <StackPanel Height="41" Width="399" Orientation="Horizontal">
+                <!-- Calories TextBox -->
+                <TextBox x:Name="txtCalories" TextWrapping="Wrap" Text="Calories" Width="127" Style="{StaticResource NormalTextBox}" Height="42" FontSize="30" />
+                <!-- Total Calories Label -->
+                <Label x:Name="lblTotalCalories" Content="Total Calories:" Height="42" Width="149" Style="{StaticResource NormalLabel}" FontSize="30"/>
+                <!-- Total Calories TextBlock -->
+                <TextBlock x:Name="txtblcTotalCalories" TextWrapping="Wrap" Text="0" Style="{StaticResource NormalTextBlok}" Width="120" />
+            </StackPanel>
+
+            <!-- Food Group ComboBox -->
+            <ComboBox x:Name="cmboFoodGroup" Width="396" Height="47" BorderBrush="Black" BorderThickness="3" SelectedIndex="0" FontFamily="Pristina" FontSize="30" IsReadOnly="True" HorizontalContentAlignment="Center">
+                <ComboBox.Background>
+                    <LinearGradientBrush EndPoint="0,1">
+                        <GradientStop Color="#FFF0F0F0"/>
+                        <GradientStop Color="White" Offset="1"/>
+                    </LinearGradientBrush>
+                </ComboBox.Background>
+                <ComboBoxItem Content="Food Group"/>
+                <ComboBoxItem Content="Carbohydrates"/>
+                <ComboBoxItem Content="Fruits and Vegetables"/>
+                <ComboBoxItem Content="Dry Beans, Peas, Lentils, and Soya"/>
+                <ComboBoxItem Content="Chicken, Fish, Meat, and Eggs"/>
+                <ComboBoxItem Content="Dairy"/>
+                <ComboBoxItem Content="Fats and Oil"/>
+                <ComboBoxItem Content="Water"/>
+            </ComboBox>
+
+            <!-- Buttons StackPanel -->
+            <StackPanel Height="100" Orientation="Horizontal">
+                <!-- Add Ingredient Button -->
+                <Button x:Name="btnAddIngredient" Content="Add Ingredient" Style="{StaticResource BookButton}" Width="193" Height="57" Background="#FFF95F5F" Click="btnAddIngredient_Click"/>
+                <!-- Continue Button -->
+                <Button x:Name="btnContinue" Content="Continue" Style="{StaticResource BookButton}" Width="208" Height="56" Background="#FF5F6FF9" Click="btnContinue_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Placeholder Frame for Navigation -->
+        <Frame x:Name="CARIngredientPage" />
+    </Grid>
+</Page>
